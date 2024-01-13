@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>../Application_Test/Builds/Debug/exit.png</file>
+        <file>Icons/exit.png</file>
     </qresource>
 </RCC>
