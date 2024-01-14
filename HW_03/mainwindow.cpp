@@ -19,4 +19,3 @@ void MainWindow::on_btn_ok_cancel_accepted()
 {
     dialog->show();
 }
-

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>621</width>
-    <height>542</height>
+    <width>543</width>
+    <height>428</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -20,96 +20,27 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="lb_bdName">
-        <property name="text">
-         <string>&amp;Название базы данных:</string>
-        </property>
-        <property name="buddy">
-         <cstring>le_bdName</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="le_bdName"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lb_login">
-        <property name="text">
-         <string>&amp;Логин:</string>
-        </property>
-        <property name="buddy">
-         <cstring>le_login</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lb_pswrd">
-        <property name="text">
-         <string>&amp;Пароль:</string>
-        </property>
-        <property name="buddy">
-         <cstring>le_pswrd</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lb_hostName">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>&amp;Имя хоста:</string>
-        </property>
-        <property name="buddy">
-         <cstring>le_hostName</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="le_hostName"/>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="le_pswrd"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="le_login"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lb_connPort">
-        <property name="text">
-         <string>&amp;Порт подключения:</string>
-        </property>
-        <property name="buddy">
-         <cstring>sp_connPort</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="sp_connPort">
-        <property name="maximumSize">
-         <size>
-          <width>781</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="maximum">
-         <number>1000000</number>
-        </property>
-        <property name="singleStep">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="lb_greet">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Поздравляем! Вы справились!</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
     </item>
-    <item row="1" column="0">
+    <item>
      <widget class="QDialogButtonBox" name="btn_ok_cancel">
       <property name="standardButtons">
        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
@@ -123,7 +54,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>621</width>
+     <width>543</width>
      <height>21</height>
     </rect>
    </property>
@@ -153,28 +84,21 @@
    </attribute>
   </widget>
  </widget>
- <tabstops>
-  <tabstop>le_hostName</tabstop>
-  <tabstop>le_bdName</tabstop>
-  <tabstop>le_login</tabstop>
-  <tabstop>le_pswrd</tabstop>
-  <tabstop>sp_connPort</tabstop>
- </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>btn_ok_cancel</sender>
-   <signal>clicked(QAbstractButton*)</signal>
+   <signal>accepted()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>741</x>
-     <y>398</y>
+     <x>488</x>
+     <y>383</y>
     </hint>
     <hint type="destinationlabel">
-     <x>749</x>
-     <y>520</y>
+     <x>476</x>
+     <y>405</y>
     </hint>
    </hints>
   </connection>
