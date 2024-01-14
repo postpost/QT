@@ -13,3 +13,9 @@ Dialog::~Dialog()
     delete ui;
 }
 
+
+void Dialog::on_pb_quit_clicked()
+{
+    this->close();
+}
+
