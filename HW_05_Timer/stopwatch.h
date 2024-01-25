@@ -4,12 +4,14 @@
 #include <QObject>
 #include <QTimer>
 #include <QTime>
+#include <QElapsedTimer>
 
 class Stopwatch : public QObject
 {
     Q_OBJECT
 public:
     explicit Stopwatch(QObject *parent = nullptr);
+    ~Stopwatch();
     void StartTimer();
     void StopTimer();
     void ClearTimer();
@@ -17,6 +19,8 @@ public:
 
 private:
     QTimer* timer;
+    QTime* time;
+    QElapsedTimer* newTime;
     int id;
 
 signals:

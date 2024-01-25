@@ -31,9 +31,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     Stopwatch* stopwatcher;
-    QTime time;
-    QTime circleTime;
-    QElapsedTimer newTime;
     int circle_num = 0;
 
 };

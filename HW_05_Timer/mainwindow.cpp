@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     //stopwatch object
     stopwatcher = new Stopwatch(this);
     connect(stopwatcher, &Stopwatch::sig_StartTimer, this, &MainWindow::ReceiveStartSignal);
-    newTime.restart();
+
 }
 
 MainWindow::~MainWindow()
@@ -25,16 +25,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::ReceiveStartSignal()
 {
-    int hours, mins, secs, milisecs;
-    secs = newTime.elapsed() / 1000;
-    mins = (secs /60) % 60;
-    hours = secs / 3600;
-    secs %= 60;
-    milisecs = newTime.elapsed() % 1000;
-    ui->lb_time->setText(QString("%1:%2:%3:%4").arg(hours, 2, 10, QLatin1Char('0'))
-                                            .arg(mins, 2, 10, QLatin1Char('0'))
-                                            .arg(secs, 2, 10, QLatin1Char('0'))
-                                            .arg(milisecs, 4, 10, QLatin1Char('0')));
+    stopwatcher->StartTimer();
 }
 
 void MainWindow::on_pb_start_toggled(bool checked)
