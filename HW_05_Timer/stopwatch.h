@@ -15,13 +15,19 @@ public:
     void StartTimer();
     void StopTimer();
     void ClearTimer();
+    void StartCircle();
     int GetTimerId();
+    int hours, mins, secs, milisecs;
+
+    QTime* time;
+    QTimer* timer;
 
 private:
-    QTimer* timer;
-    QTime* time;
     QElapsedTimer* newTime;
     int id;
+
+public slots:
+    void UpdateTime();
 
 signals:
     void sig_StartTimer();

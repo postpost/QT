@@ -3,13 +3,14 @@
 Stopwatch::Stopwatch(QObject *parent)
     : QObject{parent}
 {
-
     timer = new QTimer(this);
     time = new QTime();
     newTime = new QElapsedTimer();
-    connect(timer, &QTimer::timeout, this, &Stopwatch::StartTimer);
-    newTime->restart();
+    hours =0, mins = 0, secs =0, milisecs = 0;
+    time->setHMS(hours, mins, secs, milisecs);
 
+    connect(timer, &QTimer::timeout, this, &Stopwatch::UpdateTime);
+    newTime->restart();
 }
 
 Stopwatch::~Stopwatch()
@@ -20,18 +21,8 @@ Stopwatch::~Stopwatch()
 
 void Stopwatch::StartTimer()
 {
-    int hours, mins, secs, milisecs;
-    secs = newTime->elapsed() / 1000;
-    mins = (secs /60) % 60;
-    hours = secs / 3600;
-    secs %= 60;
-    milisecs = newTime->elapsed() % 1000;
-    QString str = QString("%1:%2:%3:%4").arg(hours, 2, 10, QLatin1Char('0'))
-                             .arg(mins, 2, 10, QLatin1Char('0'))
-                             .arg(secs, 2, 10, QLatin1Char('0'))
-                             .arg(milisecs, 4, 10, QLatin1Char('0'));
-    timer->start();
-    emit sig_StartTimer();
+    timer->start(10);
+    newTime->start();
 }
 
 void Stopwatch::StopTimer()
@@ -43,13 +34,32 @@ void Stopwatch::StopTimer()
 void Stopwatch::ClearTimer()
 {
      timer->stop();
-    //timer->disconnect(timer, &QTimer::destroyed, this, &Stopwatch::sig_ClearTimer);
+}
+
+void Stopwatch::StartCircle()
+{
+    QTime last_time= time->currentTime();
+
+
 }
 
 int Stopwatch::GetTimerId()
 {
     id = timer->timerId();
     return id;
+}
+
+void Stopwatch::UpdateTime()
+{
+    secs = newTime->elapsed() / 1000;
+    mins = (secs /60) % 60;
+    hours = secs / 3600;
+    secs %= 60;
+    milisecs = newTime->elapsed() % 1000;
+    //++milisecs;
+    time->setHMS(hours, mins, secs, milisecs);
+    emit sig_StartTimer();
+
 }
 
 
