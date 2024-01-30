@@ -1,4 +1,5 @@
 #include "stopwatch.h"
+#include <QtGlobal>
 
 Stopwatch::Stopwatch(QObject *parent)
     : QObject{parent}
@@ -11,36 +12,58 @@ Stopwatch::Stopwatch(QObject *parent)
 
     connect(timer, &QTimer::timeout, this, &Stopwatch::UpdateTime);
     newTime->restart();
+
+    firstCircle = new QTime();
+    lastCircle = new QTime();
 }
 
 Stopwatch::~Stopwatch()
 {
     delete time;
     delete newTime;
+    delete firstCircle;
+    delete lastCircle;
 }
 
 void Stopwatch::StartTimer()
 {
     timer->start(10);
-    newTime->start();
+   // newTime->start();
 }
 
 void Stopwatch::StopTimer()
 {
     timer->stop();
-    emit sig_StopTimer();
+    // emit sig_StopTimer();
 }
 
 void Stopwatch::ClearTimer()
 {
      timer->stop();
+     firstCircle->setHMS(0,0,0,0);
+     countCircle = 0;
+     newTime->restart();
 }
 
-void Stopwatch::StartCircle()
+QString Stopwatch::StartCircle()
 {
-    QTime last_time= time->currentTime();
-
-
+    if (countCircle == 0){
+        QString firstCircleStr = time->toString("hh:mm:ss.zzz");
+        msFirst = time->msec();
+        *firstCircle = QTime::fromString(firstCircleStr, "hh:mm:ss.zzz");
+    }
+    else if (countCircle >=1){
+        lastCircle = time;
+        quint32 hourDiff = lastCircle->hour() - firstCircle->hour();
+        quint32 minuteDiff = lastCircle->minute() - firstCircle->minute();
+        quint32 secDiff = lastCircle->second() - firstCircle->second();
+        quint32 msDiff = lastCircle->msec() - msFirst;
+        firstCircle->setHMS(hourDiff, minuteDiff, secDiff, msDiff);
+    }
+    ++countCircle;
+    //qDebug() << firstCircle->toString("hh:mm:ss.zzz");
+    return firstCircle->toString("hh:mm:ss.zzz");
+    // diff = time->addSecs(-circleTime->second());
 }
 
 int Stopwatch::GetTimerId()

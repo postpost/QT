@@ -15,11 +15,16 @@ public:
     void StartTimer();
     void StopTimer();
     void ClearTimer();
-    void StartCircle();
+    QString StartCircle();
     int GetTimerId();
     int hours, mins, secs, milisecs;
+    quint32 msFirst =0;
+
+    int countCircle = 0;
 
     QTime* time;
+    QTime* firstCircle;
+    QTime* lastCircle;
     QTimer* timer;
 
 private:

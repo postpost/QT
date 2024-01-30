@@ -32,6 +32,7 @@ void MainWindow::on_pb_start_toggled(bool checked)
     if (checked){
         ui->pb_start->setText("Стоп");
         stopwatcher->StartTimer();
+
     }
 
     else{
@@ -54,11 +55,10 @@ void MainWindow::on_pb_clear_clicked()
 
 void MainWindow::on_pb_cirlce_clicked()
 {
-    QString str = ui->lb_time->text();
-    stopwatcher->StartCircle();
+    //надо возвращать строку
+    QString circleDiff = stopwatcher->StartCircle();
     ui->txtB_display->append("Круг " + QString::number(++circle_num)
-                             + ", время: " + ui->lb_time->text()
+                             + ", время: " + circleDiff
                              + " сек.");
-
 }
 
