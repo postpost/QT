@@ -16,9 +16,10 @@ public:
     void StopTimer();
     void ClearTimer();
     QString StartCircle();
+    QString timeStr = "";
     int GetTimerId();
     int hours, mins, secs, milisecs;
-    quint32 msFirst =0;
+    int timerId;
 
     int countCircle = 0;
 

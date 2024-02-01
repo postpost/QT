@@ -9,6 +9,7 @@ Stopwatch::Stopwatch(QObject *parent)
     newTime = new QElapsedTimer();
     hours =0, mins = 0, secs =0, milisecs = 0;
     time->setHMS(hours, mins, secs, milisecs);
+    timerId = GetTimerId();
 
     connect(timer, &QTimer::timeout, this, &Stopwatch::UpdateTime);
     newTime->restart();
@@ -27,14 +28,16 @@ Stopwatch::~Stopwatch()
 
 void Stopwatch::StartTimer()
 {
-    timer->start(10);
-   // newTime->start();
+    // if (timerId == GetTimerId())
+    //     *time= QTime::fromString(timeStr, "hh:mm:ss.zzz");
+    timer->start(100);
+
 }
 
 void Stopwatch::StopTimer()
 {
     timer->stop();
-    // emit sig_StopTimer();
+    //timeStr = time->toString("hh:mm:ss.zzz");
 }
 
 void Stopwatch::ClearTimer()
@@ -42,14 +45,13 @@ void Stopwatch::ClearTimer()
      timer->stop();
      firstCircle->setHMS(0,0,0,0);
      countCircle = 0;
-     newTime->restart();
+     //newTime->restart();
 }
 
 QString Stopwatch::StartCircle()
 {
     if (countCircle == 0){
         QString firstCircleStr = time->toString("hh:mm:ss.zzz");
-        msFirst = time->msec();
         *firstCircle = QTime::fromString(firstCircleStr, "hh:mm:ss.zzz");
     }
     else if (countCircle >=1){
@@ -57,7 +59,7 @@ QString Stopwatch::StartCircle()
         quint32 hourDiff = lastCircle->hour() - firstCircle->hour();
         quint32 minuteDiff = lastCircle->minute() - firstCircle->minute();
         quint32 secDiff = lastCircle->second() - firstCircle->second();
-        quint32 msDiff = lastCircle->msec() - msFirst;
+        quint32 msDiff = lastCircle->msec() - firstCircle->msec();
         firstCircle->setHMS(hourDiff, minuteDiff, secDiff, msDiff);
     }
     ++countCircle;
@@ -79,10 +81,8 @@ void Stopwatch::UpdateTime()
     hours = secs / 3600;
     secs %= 60;
     milisecs = newTime->elapsed() % 1000;
-    //++milisecs;
     time->setHMS(hours, mins, secs, milisecs);
     emit sig_StartTimer();
-
 }
 
 
