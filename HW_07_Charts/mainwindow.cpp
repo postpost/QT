@@ -270,6 +270,21 @@ void MainWindow::on_pb_start_clicked()
             y[i] = maxs[i] + step;
         }
 
+        //graph size
+        //Заполняем серию точками из testData.adc
+        uint32_t size = 0;
+        if (mins.size() >= maxs.size())
+            size = maxs.size();
+        else
+            size = mins.size();
+
+        for (int i=0; i< size; ++i){
+            ptrGraph->append(mins[i], maxs[i]);
+            //qDebug() << ptrGraph->at(i);
+        }
+        chartView->chart()->addSeries(ptrGraph);
+        chartView->chart()->createDefaultAxes();
+
         emit sig_DisplayGraph(x, y);
 
     };
@@ -282,7 +297,7 @@ void MainWindow::on_pb_start_clicked()
 }
 
 void MainWindow::showGraph(QVector<double> mins, QVector<double> maxs)
-{
+{/*
     //graph size
     uint32_t size = 0;
     if (mins.size() >= maxs.size())
@@ -295,7 +310,7 @@ void MainWindow::showGraph(QVector<double> mins, QVector<double> maxs)
         //qDebug() << ptrGraph->at(i);
     }
     chartView->chart()->addSeries(ptrGraph);
-    chartView->chart()->createDefaultAxes();
+    chartView->chart()->createDefaultAxes();*/
     layout->addWidget(chartView);
     chartView->show();
 }

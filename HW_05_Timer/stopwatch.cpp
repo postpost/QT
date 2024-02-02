@@ -37,7 +37,7 @@ void Stopwatch::StartTimer()
 void Stopwatch::StopTimer()
 {
     timer->stop();
-    //timeStr = time->toString("hh:mm:ss.zzz");
+   //timeStr = time->toString("hh:mm:ss.zzz");
 }
 
 void Stopwatch::ClearTimer()
@@ -45,7 +45,7 @@ void Stopwatch::ClearTimer()
      timer->stop();
      firstCircle->setHMS(0,0,0,0);
      countCircle = 0;
-     //newTime->restart();
+     newTime->restart();
 }
 
 QString Stopwatch::StartCircle()
@@ -55,7 +55,9 @@ QString Stopwatch::StartCircle()
         *firstCircle = QTime::fromString(firstCircleStr, "hh:mm:ss.zzz");
     }
     else if (countCircle >=1){
-        lastCircle = time;
+        QString lastCircleStr = time->toString("hh:mm:ss.zzz");
+        *lastCircle = QTime::fromString(lastCircleStr, "hh:mm:ss.zzz");
+        //lastCircle = time; //здесь два объекта ссылаются на одну и ту же память, это нормально?
         quint32 hourDiff = lastCircle->hour() - firstCircle->hour();
         quint32 minuteDiff = lastCircle->minute() - firstCircle->minute();
         quint32 secDiff = lastCircle->second() - firstCircle->second();
@@ -65,7 +67,8 @@ QString Stopwatch::StartCircle()
     ++countCircle;
     //qDebug() << firstCircle->toString("hh:mm:ss.zzz");
     return firstCircle->toString("hh:mm:ss.zzz");
-    // diff = time->addSecs(-circleTime->second());
+    *lastCircle = time->addSecs(-firstCircle->second());
+
 }
 
 int Stopwatch::GetTimerId()
