@@ -254,34 +254,19 @@ void MainWindow::on_pb_start_clicked()
                 chart->removeSeries(ptrGraph);
             }
             //установим шаг сетки
-            double step = 0.1;
-            double minVal = mins.back();
-//            double maxVal = maxs.first() + step;
-            double steps = 1000;//round((maxVal - minVal)/step);
+           double steps = 1000;
            x.resize(steps);
            y.resize(steps);
-           x[0] = minVal;
            for (int i =0; i< steps; ++i){
-                x[i] = res[i] + step;
-                y[i] = res[i] + step;
+                x[i] = i;
+                y[i] = res[i];
             }
 
-            // for (int i =0; i< maxs.size(); ++i){
-            //     y[i] = maxs[i] + step;
-            // }
-
-            //graph size
             //Заполняем серию точками из testData.adc
             uint32_t size = 1000;
-            // if (mins.size() >= maxs.size())
-            //     size = maxs.size();
-            // else
-            //     size = mins.size();
             for (int i=0; i< size; ++i){
                 ptrGraph->append(x[i], y[i]);
             }
-            chartView->chart()->addSeries(ptrGraph);
-            chartView->chart()->createDefaultAxes();
 
             emit sig_DisplayGraph(x, y);
 
@@ -293,20 +278,9 @@ void MainWindow::on_pb_start_clicked()
 }
 
 void MainWindow::showGraph(QVector<double> mins, QVector<double> maxs)
-{/*
-    //graph size
-    uint32_t size = 0;
-    if (mins.size() >= maxs.size())
-        size = maxs.size();
-    else
-        size = mins.size();
-
-    for (int i=0; i< size; ++i){
-        ptrGraph->append(mins[i], maxs[i]);
-        //qDebug() << ptrGraph->at(i);
-    }
+{
     chartView->chart()->addSeries(ptrGraph);
-    chartView->chart()->createDefaultAxes();*/
+    chartView->chart()->createDefaultAxes();
     layout->addWidget(chartView);
     chartView->show();
 }
