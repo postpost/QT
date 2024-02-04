@@ -10,6 +10,7 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QSqlTableModel>
+#include <QtConcurrent>
 
 #define POSTGRE_DRIVER "QPSQL"
 #define DB_NAME "MyDB"
@@ -49,7 +50,7 @@ public:
     void RequestToDB(QString request);
     QSqlError GetLastError(void);
     void ConnectToDataBase(QVector<QString> dataForConnect);
-    void ReadAnswerFromDB(int answerType);
+    void ReadAnswerFromDB(int requestType, QString request);
 
 
 signals:
@@ -63,9 +64,10 @@ signals:
 private:
 
     QSqlDatabase* dataBase; //для подключения к БД
-    QSqlQueryModel* queryToComedyAndHorror; //запрос на получение комедий и ужасов
-    QSqlTableModel* queryToAllFilms; //запрос на получение ВСЕХ фильмов
-    QTableWidget* tbWidget; //для отображения таблицы
+
+    QSqlQueryModel* modelComedyAndHorror; //запрос на получение комедий и ужасов
+    QSqlTableModel* modelAllFilms; //запрос на получение ВСЕХ фильмов
+
     QTableView *view; //для отображения таблицы
 
 };

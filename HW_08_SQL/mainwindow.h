@@ -47,11 +47,11 @@ private:
     QMessageBox* msg;
 
 
-    QString request = "SELECT title, release_year, c.name  FROM film f "
+    QString requestAll = "SELECT title, release_year, c.name  FROM film f "
                       "JOIN film_category fc on f.film_id = fc.film_id "
                       "JOIN category c on c.category_id  = fc.category_id";
 
-    QString filmAndHorrorReq = "SELECT title, description "
+    QString reqComedyAndHorror = "SELECT title, description "
                       "FROM film f JOIN film_category fc on f.film_id = fc.film_id "
                       "JOIN category c on c.category_id = fc.category_id "
                       "WHERE c.name = 'Comedy' ('Horror')";

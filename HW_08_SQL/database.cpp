@@ -3,10 +3,12 @@
 DataBase::DataBase(QObject *parent)
     : QObject{parent}
 {
-
+    //создаем объект, где будем хранить данные для подключения
     dataBase = new QSqlDatabase();
-    queryToComedyAndHorror = new QSqlQueryModel();
-    tbWidget = new QTableWidget();
+
+
+
+    //создаем для отображения
     view = new QTableView();
 
 
@@ -15,8 +17,8 @@ DataBase::DataBase(QObject *parent)
 DataBase::~DataBase()
 {
     delete dataBase;
-    delete queryToAllFilms;
-    delete queryToComedyAndHorror;
+    delete modelAllFilms;
+    delete modelComedyAndHorror;
     delete view;
 }
 
@@ -27,7 +29,7 @@ DataBase::~DataBase()
  */
 void DataBase::AddDataBase(QString driver, QString nameDB)
 {
-
+    //добавляем базу данных, к которой будем подключаться
     *dataBase = QSqlDatabase::addDatabase(driver, nameDB);
 
 }
@@ -39,7 +41,6 @@ void DataBase::AddDataBase(QString driver, QString nameDB)
  */
 void DataBase::ConnectToDataBase(QVector<QString> data)
 {
-
     dataBase->setHostName(data[hostName]);
     dataBase->setDatabaseName(data[dbName]);
     dataBase->setUserName(data[login]);
@@ -50,9 +51,13 @@ void DataBase::ConnectToDataBase(QVector<QString> data)
 
     bool status;
     status = dataBase->open( );
-    if (status)
-        queryToAllFilms = new QSqlTableModel(this, QSqlDatabase::database(DB_NAME));
-
+    qDebug() << status;
+    if (status){
+        //создаем объект для сохранения таблицы в модели
+        modelComedyAndHorror = new QSqlQueryModel();
+        modelAllFilms = new QSqlTableModel(this,*dataBase);
+        //QSqlDatabase::database(DB_NAME)
+    }
     emit sig_SendStatusConnection(status);
 
 }
@@ -62,10 +67,9 @@ void DataBase::ConnectToDataBase(QVector<QString> data)
  */
 void DataBase::DisconnectFromDataBase(QString nameDb)
 {
-
+    //что мы здесь сохраняем и зачем, если у нас в экземпляре уже лежит БД?
     *dataBase = QSqlDatabase::database(nameDb);
     dataBase->close();
-
 }
 /*!
  * \brief Метод формирует запрос к БД.
@@ -76,41 +80,47 @@ void DataBase::RequestToDB(QString request)
 {
     //Тут должен быть код ДЗ
     QSqlError err;
-    if(dataBase->open() == false)
-        qDebug() << queryToAllFilms->database();
-        err = queryToAllFilms->lastError();
-    err = queryToComedyAndHorror->lastError();
+    int reqType = 0;
+    if (request.contains("Comedy")||request.contains("Horror"))
+        reqType = 1;
+    else
+        reqType = 2;
+    if(!dataBase->open()) {
+        switch (reqType){
+        case 1:err = modelComedyAndHorror->lastError();
+            break;
+        case 2: err = modelAllFilms->lastError();
+            break;
+        }
+    }
 
     emit sig_SendStatusRequest(err);
 }
 
-void DataBase::ReadAnswerFromDB(int requestType){
+void DataBase::ReadAnswerFromDB(int requestType, QString request){
 
-   // int rowCount = 0;
-   // int colCount = 0;
+    modelComedyAndHorror->setQuery(request);
     QStringList headers;
-
     switch (requestType) {
     case requestAllFilms:
         headers.clear();
         headers << "Название" << "Год выпуска" << "Жанр";
         for (int i=0; i< headers.size(); ++i){
-            queryToAllFilms->setHeaderData(i, Qt::Horizontal, headers.at(i));
-        }
-        view->setModel(queryToAllFilms);
+            modelAllFilms->setHeaderData(i, Qt::Horizontal, headers.at(i));
+        };
+        view->setModel(modelAllFilms);
         break;
     case requestComedy: case requestHorrors:
+        modelAllFilms->setTable(TABLE_NAME);
         headers.clear();
         headers << "Название" << "Описание";
         for (int i=0; i< headers.size(); ++i){
-            queryToAllFilms->setHeaderData(i, Qt::Horizontal, headers.at(i));
+            modelAllFilms->setHeaderData(i, Qt::Horizontal, headers.at(i));
         }
-        view->setModel(queryToComedyAndHorror);
+        view->setModel(modelComedyAndHorror);
         break;
     }
     emit sig_SendDataFromDB(view, requestType);
-    view->show();
-
 }
 
 /*!

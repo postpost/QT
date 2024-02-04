@@ -58,7 +58,7 @@ MainWindow::~MainWindow()
  */
 void MainWindow::on_act_addData_triggered()
 {
-    //Отобразим диалоговое окно. Какой метод нужно использовать?
+    //Отобразим диалоговое окно.
     dataDb->show();
 }
 
@@ -79,11 +79,9 @@ void MainWindow::on_act_connect_triggered()
 
        ui->lb_statusConnect->setText("Подключение");
        ui->lb_statusConnect->setStyleSheet("color : black");
-
-
-       auto conn = [&]{dataBase->ConnectToDataBase(dataForConnect);};
-       QtConcurrent::run(conn);
-
+       // auto conn = [&]{dataBase->ConnectToDataBase(dataForConnect);};
+       // QtConcurrent::run(conn);
+       dataBase->ConnectToDataBase(dataForConnect);
     }
     else{
         dataBase->DisconnectFromDataBase(DB_NAME);
@@ -100,16 +98,16 @@ void MainWindow::on_act_connect_triggered()
  */
 void MainWindow::on_pb_request_clicked()
 {
-    QString str = ui->cb_category->currentText();
+    QString request="";
      ///Тут должен быть код ДЗ
     if (ui->cb_category->currentText() == "Все"){
-        auto req = [&]{dataBase->RequestToDB(request);};
-        QtConcurrent::run(req);
+        request = requestAll;
     }
     else {
-        auto req = [&]{dataBase->RequestToDB(filmAndHorrorReq);};
-        QtConcurrent::run(req);
+        request = reqComedyAndHorror;
     }
+    auto reqToSend = [&]{dataBase->RequestToDB(request);};
+    QtConcurrent::run(reqToSend);
 }
 
 /*!
@@ -120,8 +118,7 @@ void MainWindow::on_pb_request_clicked()
 void MainWindow::ScreenDataFromDB(QTableView* view, int typeRequest)
 {
     view->show();
-    dataBase->ReadAnswerFromDB(typeRequest);
-    ///Тут должен быть код ДЗ
+    //Тут должен быть код ДЗ
 }
 /*!
  * \brief Метод изменяет стотояние формы в зависимости от статуса подключения к БД
@@ -152,11 +149,11 @@ void MainWindow::ReceiveStatusRequestToDB(QSqlError err){
         msg->exec();
     }
     else if (ui->cb_category->currentText() == "Все")
-        dataBase->ReadAnswerFromDB(requestAllFilms);
+        dataBase->ReadAnswerFromDB(requestAllFilms, requestAll);
     else if (ui->cb_category->currentText() == "Комедия")
-        dataBase->ReadAnswerFromDB(requestComedy);
+        dataBase->ReadAnswerFromDB(requestComedy, reqComedyAndHorror);
     else if (ui->cb_category->currentText() == "Ужасы")
-        dataBase->ReadAnswerFromDB(requestHorrors);
+        dataBase->ReadAnswerFromDB(requestHorrors, reqComedyAndHorror);
 }
 
 
