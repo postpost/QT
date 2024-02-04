@@ -103,6 +103,7 @@ void DataBase::ReadAnswerFromDB(int requestType, QString request){
     QStringList headers;
     switch (requestType) {
     case requestAllFilms:
+        modelAllFilms->setTable(TABLE_NAME);
         headers.clear();
         headers << "Название" << "Год выпуска" << "Жанр";
         for (int i=0; i< headers.size(); ++i){
@@ -111,7 +112,6 @@ void DataBase::ReadAnswerFromDB(int requestType, QString request){
         view->setModel(modelAllFilms);
         break;
     case requestComedy: case requestHorrors:
-        modelAllFilms->setTable(TABLE_NAME);
         headers.clear();
         headers << "Название" << "Описание";
         for (int i=0; i< headers.size(); ++i){
