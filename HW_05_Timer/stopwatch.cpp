@@ -6,8 +6,6 @@ Stopwatch::Stopwatch(QObject *parent)
 {
     timer = new QTimer(this);
 
-   // newTime = new QElapsedTimer();
-    hours =0, mins = 0, secs =0, milisecs = 0;
     timerId = GetTimerId();
 
     connect(timer, &QTimer::timeout, this, &Stopwatch::UpdateTime);
