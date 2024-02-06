@@ -5,86 +5,96 @@ Stopwatch::Stopwatch(QObject *parent)
     : QObject{parent}
 {
     timer = new QTimer(this);
-    time = new QTime();
-    newTime = new QElapsedTimer();
+
+   // newTime = new QElapsedTimer();
     hours =0, mins = 0, secs =0, milisecs = 0;
-    time->setHMS(hours, mins, secs, milisecs);
     timerId = GetTimerId();
 
     connect(timer, &QTimer::timeout, this, &Stopwatch::UpdateTime);
-    newTime->restart();
 
-    firstCircle = new QTime();
-    lastCircle = new QTime();
+
 }
 
 Stopwatch::~Stopwatch()
 {
-    delete time;
-    delete newTime;
-    delete firstCircle;
-    delete lastCircle;
+
 }
 
 void Stopwatch::StartTimer()
 {
-    // if (timerId == GetTimerId())
-    //     *time= QTime::fromString(timeStr, "hh:mm:ss.zzz");
     timer->start(100);
-
 }
 
 void Stopwatch::StopTimer()
 {
     timer->stop();
-   //timeStr = time->toString("hh:mm:ss.zzz");
+
 }
 
 void Stopwatch::ClearTimer()
 {
-     timer->stop();
-     firstCircle->setHMS(0,0,0,0);
-     countCircle = 0;
-     newTime->restart();
+    timer->stop();
+    countCircle = 0;
+    milisecCount = 0;
+    milisecs = 0;
+    secs = 0;
+    mins = 0;
+    hours =0;
 }
 
-QString Stopwatch::StartCircle()
+QString Stopwatch::CalculateCircle()
 {
-    if (countCircle == 0){
-        QString firstCircleStr = time->toString("hh:mm:ss.zzz");
-        *firstCircle = QTime::fromString(firstCircleStr, "hh:mm:ss.zzz");
-    }
-    else if (countCircle >=1){
-        QString lastCircleStr = time->toString("hh:mm:ss.zzz");
-        *lastCircle = QTime::fromString(lastCircleStr, "hh:mm:ss.zzz");
-        //lastCircle = time; //здесь два объекта ссылаются на одну и ту же память, это нормально?
-        quint32 hourDiff = lastCircle->hour() - firstCircle->hour();
-        quint32 minuteDiff = lastCircle->minute() - firstCircle->minute();
-        quint32 secDiff = lastCircle->second() - firstCircle->second();
-        quint32 msDiff = lastCircle->msec() - firstCircle->msec();
-        firstCircle->setHMS(hourDiff, minuteDiff, secDiff, msDiff);
-    }
-    ++countCircle;
-    //qDebug() << firstCircle->toString("hh:mm:ss.zzz");
-    return firstCircle->toString("hh:mm:ss.zzz");
-    *lastCircle = time->addSecs(-firstCircle->second());
+    QString lap="";
 
+    if  (countCircle ==0){
+        lastLap = milisecCount;
+        ++countCircle;
+        lap = QString("0%1 : 0%2 : 0%3 : 0%4").arg(hours).arg(mins).arg(secs).arg(milisecs);
+        return lap;
+    }
+    else {
+
+        int secs_now = secs;
+        int mins_now = mins;
+        int hours_now = hours;
+
+        lastLap = milisecCount - lastLap;
+       // qDebug() << lastLap;
+        int milisec_l = lastLap % 10;
+        int secs_last = lastLap/10;
+        int mins_last = secs_now/60;
+        int hours_last = secs_now/3600;
+        lap = QString("0%1 : 0%2 : 0%3 : 0%4").arg(hours_last).arg(mins_last).arg(secs_last).arg(milisec_l);
+
+    }
+    return lap;
 }
 
 int Stopwatch::GetTimerId()
 {
-    id = timer->timerId();
-    return id;
+    timerId = timer->timerId();
+    return timerId;
 }
 
 void Stopwatch::UpdateTime()
 {
-    secs = newTime->elapsed() / 1000;
-    mins = (secs /60) % 60;
-    hours = secs / 3600;
-    secs %= 60;
-    milisecs = newTime->elapsed() % 1000;
-    time->setHMS(hours, mins, secs, milisecs);
+    time = QString("0%1 : 0%2 : 0%3 : 0%4").arg(hours).arg(mins).arg(secs).arg(milisecs);
+    milisecs++;
+    if (milisecs > 10){
+        milisecs = 0;
+        secs++;
+    }
+    if (secs > 60){
+        mins++;
+        secs = 0;
+    }
+    if (mins > 60){
+        mins =0;
+        hours++;
+    }
+    milisecCount++;
+
+
     emit sig_StartTimer();
 }
 

@@ -116,9 +116,9 @@ void MainWindow::on_pb_request_clicked()
         request = reqComedy;
         reqType = requestType::requestComedy;
     }
-    //dataBase->RequestToDB(request, reqType);
-    auto reqToSend = [&]{dataBase->RequestToDB(request, reqType);};
-    QtConcurrent::run(reqToSend);
+    dataBase->RequestToDB(request, reqType);
+    // auto reqToSend = [&]{dataBase->RequestToDB(request, reqType);};
+    // QtConcurrent::run(reqToSend);
 }
 
 /*!

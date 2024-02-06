@@ -23,7 +23,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::ReceiveStartSignal()
 {
-    ui->lb_time->setText(stopwatcher->time->toString("hh:mm:ss.zzz"));
+    ui->lb_time->setText(stopwatcher->time);
 }
 
 void MainWindow::on_pb_start_toggled(bool checked)
@@ -55,8 +55,8 @@ void MainWindow::on_pb_clear_clicked()
 
 void MainWindow::on_pb_cirlce_clicked()
 {
-    //надо возвращать строку
-    QString circleDiff = stopwatcher->StartCircle();
+
+    QString circleDiff = stopwatcher->CalculateCircle();
     ui->txtB_display->append("Круг " + QString::number(++circle_num)
                              + ", время: " + circleDiff
                              + " сек.");

@@ -3,8 +3,6 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QTime>
-#include <QElapsedTimer>
 
 class Stopwatch : public QObject
 {
@@ -12,33 +10,37 @@ class Stopwatch : public QObject
 public:
     explicit Stopwatch(QObject *parent = nullptr);
     ~Stopwatch();
+
+    QString time = "";
+    uint32_t milisecCount = 0;
+    uint32_t lastLap = 0;
+    uint32_t lapPoint = 0;
+    //методы
     void StartTimer();
     void StopTimer();
     void ClearTimer();
-    QString StartCircle();
-    QString timeStr = "";
+
+    QString CalculateCircle();
+
     int GetTimerId();
-    int hours, mins, secs, milisecs;
-    int timerId;
 
-    int countCircle = 0;
 
-    QTime* time;
-    QTime* firstCircle;
-    QTime* lastCircle;
-    QTimer* timer;
 
 private:
-    QElapsedTimer* newTime;
-    int id;
+
+    int hours = 0, mins = 0, secs = 0, milisecs = 0;
+
+    int countCircle = 0;
+    int timerId;
+    QTimer* timer;
+
 
 public slots:
     void UpdateTime();
 
 signals:
     void sig_StartTimer();
-    void sig_StopTimer();
-    void sig_ClearTimer();
+
 };
 
 #endif // STOPWATCH_H

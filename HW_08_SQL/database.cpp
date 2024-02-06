@@ -72,7 +72,7 @@ void DataBase::RequestToDB(QString request, int requestType)
 {
     //сначала формируем запрос к БД
 
-    modelAllFilms = new QSqlTableModel(this, QSqlDatabase::database(DB_NAME));
+    modelAllFilms = new QSqlTableModel(this, *dataBase);
     modelAllFilms->setQuery(request, *dataBase);
 
     modelComedyAndHorror = new QSqlQueryModel();
