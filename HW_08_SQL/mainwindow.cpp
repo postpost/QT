@@ -99,14 +99,25 @@ void MainWindow::on_act_connect_triggered()
 void MainWindow::on_pb_request_clicked()
 {
     QString request="";
+    int reqType;
      ///Тут должен быть код ДЗ
     if (ui->cb_category->currentText() == "Все"){
-        request = requestAll;
+        request = reqAll;
+        reqType = requestType::requestAllFilms;
     }
-    else {
-        request = reqComedyAndHorror;
+    else if (ui->cb_category->currentText() == "Ужасы")
+    {
+        request = reqHorror;
+        reqType = requestType::requestHorrors;
     }
-    auto reqToSend = [&]{dataBase->RequestToDB(request);};
+
+    else if (ui->cb_category->currentText() == "Комедия")
+    {
+        request = reqComedy;
+        reqType = requestType::requestComedy;
+    }
+    //dataBase->RequestToDB(request, reqType);
+    auto reqToSend = [&]{dataBase->RequestToDB(request, reqType);};
     QtConcurrent::run(reqToSend);
 }
 
@@ -115,10 +126,16 @@ void MainWindow::on_pb_request_clicked()
  * \param widget
  * \param typeRequest
  */
-void MainWindow::ScreenDataFromDB(QTableView* view, int typeRequest)
+void MainWindow::ScreenDataFromDB(QSqlQueryModel* model, int typeRequest)
 {
-    view->show();
-    //Тут должен быть код ДЗ
+    ui->tbv_result->setModel(model);
+    if (typeRequest == requestType::requestAllFilms){
+         ui->tbv_result->hideColumn(0);
+        for (int i=4;i<model->columnCount(); ++i)
+            ui->tbv_result->hideColumn(i);
+   }
+    ui->tbv_result->show();
+
 }
 /*!
  * \brief Метод изменяет стотояние формы в зависимости от статуса подключения к БД
@@ -149,11 +166,11 @@ void MainWindow::ReceiveStatusRequestToDB(QSqlError err){
         msg->exec();
     }
     else if (ui->cb_category->currentText() == "Все")
-        dataBase->ReadAnswerFromDB(requestAllFilms, requestAll);
+        dataBase->ReadAnswerFromDB(requestType::requestAllFilms, reqAll);
     else if (ui->cb_category->currentText() == "Комедия")
-        dataBase->ReadAnswerFromDB(requestComedy, reqComedyAndHorror);
+        dataBase->ReadAnswerFromDB(requestType::requestComedy, reqComedy);
     else if (ui->cb_category->currentText() == "Ужасы")
-        dataBase->ReadAnswerFromDB(requestHorrors, reqComedyAndHorror);
+        dataBase->ReadAnswerFromDB(requestType::requestHorrors, reqHorror);
 }
 
 

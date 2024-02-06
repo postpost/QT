@@ -47,15 +47,17 @@ public:
 
     void AddDataBase(QString driver, QString nameDB = "");
     void DisconnectFromDataBase(QString nameDb = "");
-    void RequestToDB(QString request);
+    void RequestToDB(QString request, int requestType);
     QSqlError GetLastError(void);
     void ConnectToDataBase(QVector<QString> dataForConnect);
     void ReadAnswerFromDB(int requestType, QString request);
 
 
+
+
 signals:
 
-   void sig_SendDataFromDB(QTableView* view, int typeR);
+   void sig_SendDataFromDB(QSqlQueryModel* model, int typeR);
    void sig_SendStatusConnection(bool);
    void sig_SendStatusRequest(QSqlError error);
 
@@ -64,11 +66,8 @@ signals:
 private:
 
     QSqlDatabase* dataBase; //для подключения к БД
-
-    QSqlQueryModel* modelComedyAndHorror; //запрос на получение комедий и ужасов
     QSqlTableModel* modelAllFilms; //запрос на получение ВСЕХ фильмов
-
-    QTableView *view; //для отображения таблицы
+    QSqlQueryModel* modelComedyAndHorror; //запрос на получение комедий и ужасов
 
 };
 
