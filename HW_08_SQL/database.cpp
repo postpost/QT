@@ -11,6 +11,9 @@ DataBase::DataBase(QObject *parent)
 DataBase::~DataBase()
 {
     delete dataBase;
+    //возвращаю сюда, тк при отключении мы не переходим в конструктор снова
+    delete modelAllFilms;
+    delete modelComedyAndHorror;
 }
 
 /*!
@@ -57,11 +60,6 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
     *dataBase = QSqlDatabase::database(nameDb);
     dataBase->close();
 
-    //если будет многократное подключение без закрытия приложения
-    //чтобы избежать утечки памяти (вместо дестуктора)
-    delete modelAllFilms;
-    delete modelComedyAndHorror;
-
 }
 /*!
  * \brief Метод формирует запрос к БД.
@@ -71,8 +69,9 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
 void DataBase::RequestToDB(QString request, int requestType)
 {
     //сначала формируем запрос к БД
-
+    //ПРОВЕРКА
     modelAllFilms = new QSqlTableModel(this, *dataBase);
+   // modelAllFilms = new QSqlTableModel(this);
     modelAllFilms->setQuery(request, *dataBase);
 
     modelComedyAndHorror = new QSqlQueryModel();
@@ -92,7 +91,7 @@ void DataBase::RequestToDB(QString request, int requestType)
 void DataBase::ReadAnswerFromDB(int requestType, QString request){
 
     QStringList headers;
-    headers << "Название" << "Описание" << "Год выпуска";
+    headers << "Название" << "Описание";
     switch (requestType) {
     case requestAllFilms:
         modelAllFilms->setTable(TABLE_NAME);
@@ -105,7 +104,7 @@ void DataBase::ReadAnswerFromDB(int requestType, QString request){
         break;
 
     case requestComedy: case requestHorrors:
-        for (int i=0; i< headers.size()-1; ++i){
+        for (int i=0; i< headers.size(); ++i){
             modelComedyAndHorror->setHeaderData(i, Qt::Horizontal, headers.at(i));
         };
         emit sig_SendDataFromDB(modelComedyAndHorror, requestType);

@@ -79,9 +79,9 @@ void MainWindow::on_act_connect_triggered()
 
        ui->lb_statusConnect->setText("Подключение");
        ui->lb_statusConnect->setStyleSheet("color : black");
-       // auto conn = [&]{dataBase->ConnectToDataBase(dataForConnect);};
-       // QtConcurrent::run(conn);
-       dataBase->ConnectToDataBase(dataForConnect);
+       auto conn = [&]{dataBase->ConnectToDataBase(dataForConnect);};
+       QtConcurrent::run(conn);
+       //dataBase->ConnectToDataBase(dataForConnect);
     }
     else{
         dataBase->DisconnectFromDataBase(DB_NAME);
@@ -131,9 +131,12 @@ void MainWindow::ScreenDataFromDB(QSqlQueryModel* model, int typeRequest)
     ui->tbv_result->setModel(model);
     if (typeRequest == requestType::requestAllFilms){
          ui->tbv_result->hideColumn(0);
-        for (int i=4;i<model->columnCount(); ++i)
+        for (int i=3;i<model->columnCount(); ++i)
             ui->tbv_result->hideColumn(i);
    }
+    else{
+        ui->tbv_result->showColumn(0);
+    }
     ui->tbv_result->show();
 
 }
