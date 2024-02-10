@@ -11,9 +11,6 @@ DataBase::DataBase(QObject *parent)
 DataBase::~DataBase()
 {
     delete dataBase;
-    //возвращаю сюда, тк при отключении мы не переходим в конструктор снова
-    delete modelAllFilms;
-    delete modelComedyAndHorror;
 }
 
 /*!
@@ -59,6 +56,8 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
     //что мы здесь сохраняем и зачем, если у нас в экземпляре уже лежит БД?
     *dataBase = QSqlDatabase::database(nameDb);
     dataBase->close();
+    delete modelAllFilms;
+    delete modelComedyAndHorror;
 
 }
 /*!
@@ -69,20 +68,17 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
 void DataBase::RequestToDB(QString request, int requestType)
 {
     //сначала формируем запрос к БД
-    //ПРОВЕРКА
-    modelAllFilms = new QSqlTableModel(this, *dataBase);
-   // modelAllFilms = new QSqlTableModel(this);
-    modelAllFilms->setQuery(request, *dataBase);
-
-    modelComedyAndHorror = new QSqlQueryModel();
-    modelComedyAndHorror->setQuery(request, *dataBase);
-
-
     QSqlError err;
     switch (requestType){
-        case 1: err = modelAllFilms->lastError();
+        case 1:
+            modelAllFilms = new QSqlTableModel(this, *dataBase);
+            modelAllFilms->setQuery(request, *dataBase);
+            err = modelAllFilms->lastError();
             break;
-        case 2: case 3: err = modelComedyAndHorror->lastError();
+        case 2: case 3:
+            modelComedyAndHorror = new QSqlQueryModel();
+            modelComedyAndHorror->setQuery(request, *dataBase);
+            err = modelComedyAndHorror->lastError();
             break;
         }
     emit sig_SendStatusRequest(err);
