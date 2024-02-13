@@ -107,16 +107,20 @@
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>Подключение</string>
+     <string>Графики</string>
     </property>
-    <addaction name="action"/>
+    <addaction name="act_Graphs"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action">
+  <action name="act_Graphs">
+   <property name="icon">
+    <iconset theme="document-open"/>
+   </property>
    <property name="text">
-    <string>Данные для подключения</string>
+    <string>Показать</string>
    </property>
   </action>
  </widget>

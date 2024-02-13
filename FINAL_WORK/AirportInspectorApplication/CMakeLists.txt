@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
 
 add_executable(AirportInspectorApplication
       ${PROJECT_SOURCES}
+      FlightGraphs.h FlightGraphs.cpp FlightGraphs.ui
 )
 
 #adding dynamic libs of QCustomPlot

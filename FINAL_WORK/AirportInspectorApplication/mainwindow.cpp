@@ -1,8 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -12,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     _database = new DataBaseController(this);
     _msgBox = new QMessageBox(this);
     _timer = new QTimer (this);
+
 
     //SETTINGS FOR UI
     ui->lbl_ConnectionStatus->setText("Отключено");
@@ -27,9 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_database,&DataBaseController::sig_SendQueryStatus, this, &MainWindow::QueryStatusReceived);
     //после прочтения СЖЕЧЬ
     connect (_database, &DataBaseController::sig_SendReadData, this, &MainWindow::DisplayResults);
-    //метод для переподключения к БД
+    //метод для переподключения к БД (TO DO!!!)
     connect(_timer, &QTimer::timeout, _database, &DataBaseController::ConnectToDb);
-
     ConnectionStatusReceived(status);
 }
 
@@ -44,6 +42,7 @@ void MainWindow::ConnectionStatusReceived(bool status)
         ui->lbl_ConnectionStatus->setText("Подключено");
         ui->lbl_ConnectionStatus->setStyleSheet("color:green");
         LoadInitialDataList(); //загружает первоначальные данные
+         _airportCode =_database->GetAirportCode(ui->cmb_AirportList->currentIndex());
         //второй лист тут же, мб нужна будет многопоточка
      }
 
@@ -101,20 +100,20 @@ void MainWindow::SetQuery(QString airportCode, int queryType)
     }
     else if (queryType == queryType::departures){
 
-        _qrDepartures = QString("SELECT flight_no, scheduled_arrival, ad.airport_name->>'ru' "
-                              "as \"Name\" from bookings.flights f "
-                              "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
-                              "WHERE f.arrival_airport  = '%1'").arg(airportCode);
+        _qrDepartures = QString("SELECT flight_no, scheduled_departure, ad.airport_name->>'ru' as \"Name\" "
+                                "FROM bookings.flights f "
+                                "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
+                                "WHERE f.departure_airport  = '%1'").arg(airportCode);
     }
 }
 
 void MainWindow::QueryStatusReceived(QSqlError err, QString query, int queryType)
 {
-    if (!err.NoError){
+    if (err.text() == "" || err.type() != QSqlError::NoError){
            _database->ReadDataFromDb(query, queryType);
     }
     else {
-        _msgBox->setIcon(QMessageBox::Warning);
+        _msgBox->setIcon(QMessageBox::Critical);
         _msgBox->setText(err.text());
         _msgBox->exec();
     }
@@ -134,8 +133,9 @@ void MainWindow::DisplayResults(QSqlQueryModel* model, int queryType)
         ui->tbv_FlightsList->show();
     }
 
- //   ui->tbv_FlightsList->setModel(model);
+    //   ui->tbv_FlightsList->setModel(model);
 }
+
 
 void MainWindow::on_btn_Receive_clicked()
 {
@@ -147,7 +147,16 @@ void MainWindow::on_btn_Receive_clicked()
     }
     else if (ui->rdbDepartures->isChecked()){
          SetQuery(_airportCode, queryType::departures);
-        _database->RequestToDb(_qrDepartures,queryType::departures);
+        _database->RequestToDb(_qrDepartures, queryType::departures);
     }
 }
+
+
+void MainWindow::on_act_Graphs_triggered()
+{
+     //GRAPHS
+    _flightGraphs = new FlightGraphs(_airportCode, ui->cmb_AirportList->currentText(), _database, this);
+    _flightGraphs->show();
+}
+
 

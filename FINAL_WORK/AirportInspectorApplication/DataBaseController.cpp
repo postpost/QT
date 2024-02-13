@@ -1,10 +1,17 @@
 #include "DataBaseController.h"
 
+#include <QDate>
+
 DataBaseController::DataBaseController(QObject *parent)
     : QObject{parent}
 {
     _database = new QSqlDatabase();
-    _query = new QSqlQuery();
+
+
+    //nullptr
+    _modelList = nullptr;
+    _modelDirection = nullptr;
+    _modelGraph = nullptr;
 
     //add fields for the connection
     _connectionData.resize(FIELDS_NUM);
@@ -35,7 +42,7 @@ void DataBaseController::ConnectToDb()
     _database->setPassword(_connectionData[psw]);
     _database->setPort(_connectionData[port].toInt());
 
-    //открывыает БД
+    //открывает БД
     status = _database->open();
     qDebug() << status;
     emit sig_SendConnectionStatus(status);
@@ -59,42 +66,97 @@ void DataBaseController::RequestToDb(QString query, int queryType)
     QSqlError err;
     switch(queryType){
     case queryType::airportList:
-        if (_modelList!=nullptr)
+        if (_modelList != nullptr)
             delete _modelList;
         _modelList = new QSqlQueryModel( );
         _modelList->setQuery(query, *_database);
-         err = _modelList->lastError();
+        err = _modelList->lastError();
         break;
     case queryType::arrivals: case queryType::departures:
-        if (_modelDirection != nullptr)
+        if (_modelDirection !=nullptr)
             delete _modelDirection;
         _modelDirection = new QSqlQueryModel( );
         _modelDirection->setQuery(query, *_database);
-        err = _modelDirection->lastError();
+        err = _modelList->lastError();
+        break;
+    case queryType::graphMonthly:
+       // qDebug() << _database->open();
+        //TO TEST
+        qDebug() << status;
+        if (_modelGraph !=nullptr){
+            delete _modelGraph;
         }
+        _modelGraph = new QSqlQueryModel( );
+        _modelGraph ->setQuery(query, *_database);
+        err = _modelList->lastError();
+        break;
+    }
+
     emit sig_SendQueryStatus(err, query, queryType);
 }
 
 void DataBaseController::ReadDataFromDb(QString query, int queryType)
 {
+    QStringList headers;
     switch(queryType){
     case queryType::airportList:
         emit sig_SendReadData(_modelList, queryType);
         break;
-    case queryType::arrivals: case queryType::departures:
-        QStringList headers;
+
+    case queryType::arrivals:
         headers << "Номер рейса" << "Время вылета" << "Аэропорт отправления";
         for (int i=0;i< headers.size(); ++i){
             _modelDirection->setHeaderData(i, Qt::Horizontal, headers.at(i));
-
-        }
+        };
         emit sig_SendReadData(_modelDirection, queryType);
+        break;
+
+    case queryType::departures:
+        headers.clear();
+        headers << "Номер рейса" << "Время вылета" << "Аэропорт назначения";
+        for (int i=0;i< headers.size(); ++i){
+            _modelDirection->setHeaderData(i, Qt::Horizontal, headers.at(i));
+        };
+        emit sig_SendReadData(_modelDirection, queryType);
+        break;
+
+    case queryType::graphMonthly:
+    {
+        QVector <double> counts_y;
+        QVector <double> months_x;
+
+        QString month_str = ""; //get records
+        int month = 0;
+        int count = 0;
+        for (int i =0; i <_modelGraph->rowCount();++i){
+            count = _modelGraph->record(i).value(0).toInt();
+            month_str = _modelGraph->record(i).value(1).toString();
+            month = GetMonth(month_str);
+            //qDebug() << count << " " << month_str;
+            counts_y.push_back(count);
+            months_x.push_back(month);
+        }
+
+        emit sig_SendPointsData(months_x, counts_y);
+        break;
+    }
+    default:
+        break;
     }
 }
 
 QString DataBaseController::GetAirportCode(int index)
 {
-   return _modelList->record(index).value(1).toString();
+    return _modelList->record(index).value(1).toString();
+}
+
+int DataBaseController::GetMonth(QString dateString)
+{
+    QStringList dateList = dateString.split( '-' );
+    // for (int i =0; i< dateList.size(); ++i)
+    //     qDebug() << dateList[i] << '\n';
+    return dateList.at(1).toInt();
+
 }
 
 

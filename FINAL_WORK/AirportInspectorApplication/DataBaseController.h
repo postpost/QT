@@ -12,6 +12,7 @@
 #define DB_NAME "demo"
 #define FIELDS_NUM 5
 #define QR_NUM 3
+#define GRAPH_COL_NUM 2
 
 enum fieldsToConnect{
     hostName = 0,
@@ -25,7 +26,9 @@ enum fieldsToConnect{
 enum queryType{
     airportList = 0,
     departures = 1,
-    arrivals = 2
+    arrivals = 2,
+    graphMonthly = 3,
+    graphDaily = 4
 };
 
 class DataBaseController : public QObject
@@ -52,7 +55,11 @@ public:
 signals:
     void sig_SendConnectionStatus(bool status);
     void sig_SendQueryStatus(QSqlError error, QString query, int queryType);
+    void sig_SendQueryStatusToGraph (QSqlError error, QString query, int queryType);
     void sig_SendReadData(QSqlQueryModel* model, int queryType);
+
+    //FOR GRAPH
+    void sig_SendPointsData(QVector<double> months_x, QVector<double> counts_y);
 
 private:
     //fields
@@ -62,7 +69,11 @@ private:
     QSqlQueryModel *_modelDirection;
     QVector <QString> _connectionData;
 
+    //TO TEST
+    QSqlQueryModel *_modelGraph;
+
     //methods
+    int GetMonth(QString dateString);
 
 };
 
