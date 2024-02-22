@@ -1,103 +1,182 @@
 #include "FlightGraphs.h"
 #include "ui_FlightGraphs.h"
 
-FlightGraphs::FlightGraphs(QString airportCode, QString airportName, DataBaseController* database, QWidget *parent)
+FlightGraphs::FlightGraphs(QString airportCode, QString airportName, QMap<QString, QString> &dailyFlightData, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::FlightGraphs)
 {
     ui->setupUi(this);
-    SetupQuery(airportCode);
     ui->ln_Info->setText(airportName);
     ui->ln_Info->setEnabled(false);
     _msg = new QMessageBox(this);
 
-    //have to create graphManager here
+    SetUpMonthList();
 
-    // _graphManagerList.resize(GRAPH_NUM);
-    // _graphManagerList[0] = new GraphManager(ui->cPlot_Monthly);
-    // _graphManagerList[1] = new GraphManager(ui->cPlot_Daily);
+    _grManagerMonthly = new GraphManager(ui->cPlot_Monthly, graphType::bar);
+    _grManagerDaily = new GraphManager(ui->cPlot_Daily, graphType::line);
 
-    _grManagerMonthly = new GraphManager(ui->cPlot_Monthly);
 
-    _database = database;
+    //Save data into the class
+    int month = 0;
+    for (auto it = dailyFlightData.keyValueBegin(); it!=dailyFlightData.keyValueEnd();++it){
+        _dailyFlightData.insert(it->first, it->second);
+        month = GetMonth(it->first);
+        _dailyData.insert(month, it->second.toInt());
+    }
+    connect (this, &FlightGraphs::sig_SendMonthlyData, this, &FlightGraphs::ShowGraph);
 
-    //ПОСЛАТЬ ЗАПРОС В БД
-    //ПОЛУЧИТЬ ТОЧКИ
-    //ЗАПОЛНИТЬ ТОЧКАМИ СЕРИЮ
-    //ДОБАВИТЬ СЕРИЮ НА ГРАФИК (ОТОБРАЗИТЬДАННЫ)
-
-    connect(_database, &DataBaseController::sig_SendQueryStatus, this,&FlightGraphs::QueryStatusReceived);
-    connect (_database,&DataBaseController::sig_SendPointsData, this, &FlightGraphs::ShowGraph);
+    SetUpMonthlyData();
 }
 
 FlightGraphs::~FlightGraphs()
 {
     delete ui;
+    delete _grManagerMonthly;
+    delete _grManagerDaily;
 }
 
-void FlightGraphs::QueryStatusReceived(QSqlError err, QString query, int queryType)
+
+void FlightGraphs::ShowGraph()
 {
-    if (err.text() == "" || err.type() != QSqlError::NoError){
-        _database->ReadDataFromDb(_qrMonthly, queryType::graphMonthly);
-    }
-    else {
-        _msg->setIcon(QMessageBox::Critical);
-        _msg->setText(err.text());
-        _msg->exec();
-    }
+    DisplayMonthlyData();
+    DisplayDailyData(ui->cmb_MonthList->currentIndex());
+
 }
 
-void FlightGraphs::ShowGraph(QVector<double> x, QVector<double> y)
+void FlightGraphs::SetUpMonthList()
 {
+    _monthList.resize(12);
+     _monthList[0] = "Январь";
+     _monthList[1] = "Февраль";
+     _monthList[2] = "Март";
+     _monthList[3] = "Апрель";
+     _monthList[4] = "Май";
+     _monthList[5] = "Июнь";
+     _monthList[6] = "Июль";
+     _monthList[7] = "Август";
+     _monthList[8] = "Сентябрь";
+     _monthList[9] = "Октябрь";
+     _monthList[10] = "Ноябрь";
+     _monthList[11] = "Декабрь";
 
+
+     for (auto month:_monthList){
+         ui->cmb_MonthList->addItem(month);
+     }
+}
+
+
+void FlightGraphs::SetUpMonthlyData()
+{
+    int month = 0, count = 0;
+    int i = 1;
+    for (auto [key, value] :_dailyData.asKeyValueRange()) {
+        if (key == i){
+            count += value;
+            _monthlyData[key] = count;
+        }
+        else {
+            count = value;
+            i++;
+        }
+    }
+
+    emit sig_SendMonthlyData();
+}
+
+int FlightGraphs::GetMonth(QString dateString)
+{
+    QStringList dateList = dateString.split( '-' );
+    return dateList.at(1).toInt();
+}
+
+int FlightGraphs::GetDay(QString dateString)
+{
+    QStringList dateList = dateString.split( '-');
+    dateList = dateList.at(2).split('T');
+    return dateList.at(0).toInt();
+}
+
+void FlightGraphs::DisplayMonthlyData()
+{
     _grManagerMonthly->ClearGraph(ui->cPlot_Monthly);
 
-    ui->cPlot_Monthly->xAxis->setRange(1, 12);
+    ui->cPlot_Monthly->xAxis->setRange(0, 12);
     ui->cPlot_Monthly->xAxis->setLabel("Months");
     ui->cPlot_Monthly->yAxis->setLabel("Flights count");
+    ui->cPlot_Monthly->xAxis->setTicks(true);
 
     //ADD STEP
-    QVector<double> _x;
-    QVector<double> _y;
-    _x.resize(x.size()+1, 0);
-    _y.resize(y.size()+1, 0);
+    QVector<double> _xM;
+    QVector<double> _yM;
+    _xM.resize(_monthlyData.size()+1, 0);
+    _yM.resize(_monthlyData.size()+1, 0);
 
-    _x[0] = 0;
-    _y[0] = 0;
+    _xM[0] = 0;
+    _yM[0] = 0;
 
-    for (int i =1; i< _x.size(); ++i){
-        _x[i] = x[i-1];
-        _y[i] = y[i-1];
+    for (int i = 1; i< _xM.size(); ++i){
+        _xM[i] = i;
+        _yM[i] = _monthlyData.value(i);
     }
-
-    // ui->cPlot_Monthly->addGraph();
-    // ui->cPlot_Monthly->graph(0)->setData(x, y);
-
-    _grManagerMonthly->AddPointsToGraph(_x,_y);
+    _grManagerMonthly->AddPointsToGraph(_xM,_yM);
     _grManagerMonthly->UpdateGraph(ui->cPlot_Monthly);
 }
 
-void FlightGraphs::SetupQuery(QString airportCode)
+void FlightGraphs::DisplayDailyData(int index)
 {
-    _qrMonthly = QString("SELECT count(flight_no), date_trunc('month', scheduled_departure) "
-                "as \"Month\" FROM bookings.flights f "
-                "WHERE (scheduled_departure::date > date('2016-08-31') AND scheduled_departure::date <= date('2017-08-31')) "
-                "AND (f.departure_airport = '%1' OR f.arrival_airport = '%1') "
-                "GROUP BY \"Month\"").arg(airportCode);
-    //f.departure_airport, f.arrival_airport,
-    //, f.departure_airport, f.arrival_airport
+    //SHOW DAILY
+    _grManagerDaily->ClearGraph(ui->cPlot_Daily);
+    //ui->cPlot_Daily->xAxis->setRange(0, 12);
+    ui->cPlot_Daily->xAxis->setLabel("Days");
+    ui->cPlot_Daily->yAxis->setLabel("Flights count");
+    ui->cPlot_Daily->xAxis->setTicks(true);
+
+    QVector<double> _xD;
+    QVector<double> _yD;
+    int count =0;
+    int day = 0, i =0;;
+
+    int month = index+1;
+    for (auto [key, value]:_dailyData.asKeyValueRange()){
+        if (month == key)
+            count++;
+        else if (count>0) {
+            break;
+        }
+    }
+
+    _xD.resize(count);
+    _yD.resize(count);
+
+    for (auto [key, value]:_dailyFlightData.asKeyValueRange()){
+        //qDebug() << key << ": " << value << "\n";
+        if (month == GetMonth(key)){
+            day = GetDay(key);
+            _xD[i] = day;
+            _yD[i] = value.toInt();
+            i++;
+        }
+        else if (i>0){
+            break;
+        }
+    }
+    _grManagerDaily->AddPointsToGraph(_xD,_yD);
+    _grManagerDaily->UpdateGraph(ui->cPlot_Daily);
+
 }
+
 
 void FlightGraphs::on_btn_Close_clicked()
 {
-    // emit sig_SendDbPointer(_database);
-    // _database = nullptr;
     this->accept();
 }
 
 
-void FlightGraphs::on_btn_Display_clicked()
+void FlightGraphs::on_cmb_MonthList_currentIndexChanged(int index)
 {
-    _database->RequestToDb(_qrMonthly, queryType::graphMonthly);
+    if (index == 0)
+        return;
+    DisplayDailyData(index);
 }
 

@@ -3,9 +3,23 @@
 
 #include <QWidget>
 #include "GraphManager.h"
-#include "DataBaseController.h"
 
 #define GRAPH_NUM 2
+
+enum months{
+    jan = 1,
+    feb = 2,
+    mar = 3,
+    apr = 4,
+    may = 5,
+    june = 6,
+    july = 7,
+    aug = 8,
+    sep = 9,
+    oct = 10,
+    nov = 11,
+    dec = 12
+};
 
 namespace Ui {
 class FlightGraphs;
@@ -16,40 +30,44 @@ class FlightGraphs : public QDialog
     Q_OBJECT
 
 public:
-    explicit FlightGraphs(QString airportCode, QString airportName, DataBaseController* database, QWidget *parent = nullptr);
+    explicit FlightGraphs(QString airportCode, QString airportName, QMap<QString, QString> &dailyFlightData, QWidget *parent = nullptr);
     ~FlightGraphs();
 
 
 public slots:
-    void QueryStatusReceived (QSqlError err, QString query, int queryType);
-    void ShowGraph(QVector<double> x, QVector<double> y);
+    void ShowGraph();
 
 signals:
-    void sig_SendDbPointer(DataBaseController* _database);
+    void sig_SendMonthlyData();
 
 private slots:
     void on_btn_Close_clicked();
 
-    void on_btn_Display_clicked();
+    void on_cmb_MonthList_currentIndexChanged(int index);
 
 private:
     Ui::FlightGraphs *ui;
     QMessageBox *_msg;
   //  QList <GraphManager*> _graphManagerList;
     GraphManager *_grManagerMonthly;
+    GraphManager *_grManagerDaily;
 
     //TO GET DATA FROM DB
-    DataBaseController *_database;
+    QMultiMap<int, int> _dailyData;
+    QMap<QString, QString> _dailyFlightData;
+    QMap<int, int> _monthlyData;
+    QVector <QString> _monthList;
 
-    QString _qrMonthly ="";
-    QString _qrDaily = "SELECT count(flight_no), date_trunc('day', scheduled_departure) as \"Day\" "
-                           "FROM bookings.flights f"
-                           "WHERE(scheduled_departure::date > date('2016-08-31') and scheduled_departure::date <= date('2017-08-31')) "
-                           "AND ( departure_airport = airportCode or arrival_airport = airportCode) "
-                           "GROUP BY \"Day\"";
 
     //methods
-    void SetupQuery(QString airportCode);
+    void SetUpDailyData();
+    void SetUpMonthlyData();
+    void SetUpMonthList();
+    int GetMonth(QString dateString);
+    int GetDay(QString dateString);
+
+    void DisplayMonthlyData();
+    void DisplayDailyData(int index);
 
 
 };

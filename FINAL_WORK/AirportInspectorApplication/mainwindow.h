@@ -32,11 +32,14 @@ public slots:
     void QueryStatusReceived(QSqlError err, QString query, int queryType);
     void DisplayResults(QSqlQueryModel* model, int queryType);
    //void ReceiveDbPointer(DataBaseController * database);
+    void PointsDataReceived(QMap<QString, QString> &dailyFlightData);
 
 private slots:
     void on_btn_Receive_clicked();
     void on_act_Graphs_triggered();
 
+
+    void on_btn_Clear_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -58,7 +61,7 @@ private:
     void AddInitialQueryList();
 
     void ConfigureDateTime();
-    void SetQuery(QString airportCode, int queryType);
+    void SetUpQuery(QString airportCode, int queryType);
 
 
 
@@ -80,6 +83,9 @@ private:
                           "FROM bookings.flights f "
                           "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
                           "WHERE f.departure_airport  = '%1'";*/
+
+    QString _qrGraphDaily = "";
+    QString _qrGraphMonthly="";
 
 };
 #endif // MAINWINDOW_H

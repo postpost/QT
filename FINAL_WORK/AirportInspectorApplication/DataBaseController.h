@@ -49,7 +49,6 @@ public:
     QSqlError GetLastError();
     void RequestToDb(QString query, int queryType);
     void ReadDataFromDb(QString query, int queryType);
-
     QString GetAirportCode(int index);
 
 signals:
@@ -59,7 +58,7 @@ signals:
     void sig_SendReadData(QSqlQueryModel* model, int queryType);
 
     //FOR GRAPH
-    void sig_SendPointsData(QVector<double> months_x, QVector<double> counts_y);
+    void sig_SendPointsData(QMap<QString, QString> &dailyFlightData);
 
 private:
     //fields
@@ -68,12 +67,14 @@ private:
     QSqlQueryModel *_modelList;
     QSqlQueryModel *_modelDirection;
     QVector <QString> _connectionData;
+    QVector <double> counts_y;
+    QVector <double> months_x;
 
-    //TO TEST
+    //container for days statistics
+    QMap<QString, QString> _dailyFlightData;
+    QMultiMap<int, int> _dailyData;
+
     QSqlQueryModel *_modelGraph;
-
-    //methods
-    int GetMonth(QString dateString);
 
 };
 

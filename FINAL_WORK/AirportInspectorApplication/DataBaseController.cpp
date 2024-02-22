@@ -1,6 +1,7 @@
 #include "DataBaseController.h"
 
 #include <QDate>
+#include <_mingw_mac.h>
 
 DataBaseController::DataBaseController(QObject *parent)
     : QObject{parent}
@@ -90,7 +91,20 @@ void DataBaseController::RequestToDb(QString query, int queryType)
         _modelGraph ->setQuery(query, *_database);
         err = _modelList->lastError();
         break;
-    }
+    case queryType::graphDaily:
+        // qDebug() << _database->open();
+        //TO TEST
+        qDebug() << status;
+        if (_modelGraph !=nullptr){
+            delete _modelGraph;
+        }
+        _modelGraph = new QSqlQueryModel( );
+        _modelGraph ->setQuery(query, *_database);
+        err = _modelList->lastError();
+        break;
+    default:
+        break;
+    };
 
     emit sig_SendQueryStatus(err, query, queryType);
 }
@@ -120,24 +134,36 @@ void DataBaseController::ReadDataFromDb(QString query, int queryType)
         emit sig_SendReadData(_modelDirection, queryType);
         break;
 
-    case queryType::graphMonthly:
+    // case queryType::graphMonthly:
+    // {
+    //     QString month_str = ""; //get records
+    //     int month = 0;
+    //     int count = 0;
+    //     for (int i =0; i <_modelGraph->rowCount();++i){
+    //         count = _modelGraph->record(i).value(0).toInt();
+    //         month_str = _modelGraph->record(i).value(1).toString();
+    //         month = GetMonth(month_str);
+    //         //qDebug() << count << " " << month_str;
+    //         counts_y.push_back(count);
+    //         months_x.push_back(month);
+    //     }
+
+    //     emit sig_SendPointsData(months_x, counts_y);
+    //     break;
+    // }
+
+    case queryType::graphMonthly:case queryType::graphDaily:
     {
-        QVector <double> counts_y;
-        QVector <double> months_x;
-
-        QString month_str = ""; //get records
+        QString count = "";
+        QString day ="";
         int month = 0;
-        int count = 0;
+        qDebug() << _modelGraph->rowCount();
         for (int i =0; i <_modelGraph->rowCount();++i){
-            count = _modelGraph->record(i).value(0).toInt();
-            month_str = _modelGraph->record(i).value(1).toString();
-            month = GetMonth(month_str);
-            //qDebug() << count << " " << month_str;
-            counts_y.push_back(count);
-            months_x.push_back(month);
+            day = _modelGraph->record(i).value(1).toString();
+            count = _modelGraph->record(i).value(0).toString();
+            _dailyFlightData[day] = count;
         }
-
-        emit sig_SendPointsData(months_x, counts_y);
+        emit sig_SendPointsData(_dailyFlightData);
         break;
     }
     default:
@@ -149,16 +175,6 @@ QString DataBaseController::GetAirportCode(int index)
 {
     return _modelList->record(index).value(1).toString();
 }
-
-int DataBaseController::GetMonth(QString dateString)
-{
-    QStringList dateList = dateString.split( '-' );
-    // for (int i =0; i< dateList.size(); ++i)
-    //     qDebug() << dateList[i] << '\n';
-    return dateList.at(1).toInt();
-
-}
-
 
 QSqlError DataBaseController::GetLastError()
 {

@@ -120,7 +120,7 @@
     <iconset theme="document-open"/>
    </property>
    <property name="text">
-    <string>Показать</string>
+    <string>Показать загруженность</string>
    </property>
   </action>
  </widget>
