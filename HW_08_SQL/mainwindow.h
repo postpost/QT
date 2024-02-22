@@ -34,6 +34,8 @@ private slots:
     void on_pb_request_clicked();
 
 
+    void on_pb_clear_clicked();
+
 signals:
     void sig_RequestToDb(QString request);
 
@@ -45,6 +47,9 @@ private:
     DbData *dataDb; //диалоговое окно для подключения к БД
     DataBase* dataBase; //класс для работы с БД
     QMessageBox* msg;
+    QSqlQueryModel *_modelAllFilms; //запрос на получение ВСЕХ фильмов
+    QSqlQueryModel* _modelComedyAndHorror; //запрос на получение комедий и ужасов
+
 
 
     QString reqAll = "SELECT title, release_year, c.name  FROM film f "
@@ -60,6 +65,8 @@ private:
                         "FROM film f JOIN film_category fc on f.film_id = fc.film_id "
                         "JOIN category c on c.category_id = fc.category_id "
                         "WHERE c.name = 'Horror'";
+
+
 
 
 };

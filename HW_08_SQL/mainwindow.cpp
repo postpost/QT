@@ -130,11 +130,13 @@ void MainWindow::ScreenDataFromDB(QSqlQueryModel* model, int typeRequest)
 {
     ui->tbv_result->setModel(model);
     if (typeRequest == requestType::requestAllFilms){
+        _modelAllFilms = model;
          ui->tbv_result->hideColumn(0);
         for (int i=3;i<model->columnCount(); ++i)
             ui->tbv_result->hideColumn(i);
    }
     else{
+        _modelComedyAndHorror = model;
         ui->tbv_result->showColumn(0);
     }
     ui->tbv_result->show();
@@ -176,4 +178,13 @@ void MainWindow::ReceiveStatusRequestToDB(QSqlError err){
         dataBase->ReadAnswerFromDB(requestType::requestHorrors, reqHorror);
 }
 
+
+
+void MainWindow::on_pb_clear_clicked()
+{
+    if (ui->cb_category->currentText() == "Все")
+        _modelAllFilms->clear();
+    else
+        _modelComedyAndHorror->clear();
+}
 

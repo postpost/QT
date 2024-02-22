@@ -5,6 +5,8 @@ DataBase::DataBase(QObject *parent)
 {
     //создаем объект, где будем хранить данные для подключения
     dataBase = new QSqlDatabase();
+    modelAllFilms = nullptr;
+    modelComedyAndHorror = nullptr;
 
 }
 
@@ -56,9 +58,12 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
     //что мы здесь сохраняем и зачем, если у нас в экземпляре уже лежит БД?
     *dataBase = QSqlDatabase::database(nameDb);
     dataBase->close();
-    delete modelAllFilms;
-    delete modelComedyAndHorror;
-
+    if (modelAllFilms !=nullptr){
+        delete modelAllFilms;
+    }
+    else if (modelComedyAndHorror !=nullptr){
+        delete modelComedyAndHorror;
+    }
 }
 /*!
  * \brief Метод формирует запрос к БД.
