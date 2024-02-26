@@ -58,12 +58,6 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
     //что мы здесь сохраняем и зачем, если у нас в экземпляре уже лежит БД?
     *dataBase = QSqlDatabase::database(nameDb);
     dataBase->close();
-    if (modelAllFilms !=nullptr){
-        delete modelAllFilms;
-    }
-    else if (modelComedyAndHorror !=nullptr){
-        delete modelComedyAndHorror;
-    }
 }
 /*!
  * \brief Метод формирует запрос к БД.
@@ -76,11 +70,17 @@ void DataBase::RequestToDB(QString request, int requestType)
     QSqlError err;
     switch (requestType){
         case 1:
+            if (modelAllFilms !=nullptr){
+            delete modelAllFilms;
+            }
             modelAllFilms = new QSqlTableModel(this, *dataBase);
             modelAllFilms->setQuery(request, *dataBase);
             err = modelAllFilms->lastError();
             break;
         case 2: case 3:
+            if (modelComedyAndHorror !=nullptr){
+                delete modelComedyAndHorror;
+            }
             modelComedyAndHorror = new QSqlQueryModel();
             modelComedyAndHorror->setQuery(request, *dataBase);
             err = modelComedyAndHorror->lastError();
