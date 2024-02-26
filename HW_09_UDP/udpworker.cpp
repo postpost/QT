@@ -13,7 +13,6 @@ UDPworker::UDPworker(QObject *parent) : QObject(parent)
  */
 void UDPworker::InitSocket()
 {
-
     serviceUdpSocket = new QUdpSocket(this);
     /*
      * Соединяем присваиваем адрес и порт серверу и соединяем функцию
@@ -23,10 +22,13 @@ void UDPworker::InitSocket()
 
     //сигнал испускается, когда сервер присылает данные
     connect(serviceUdpSocket, &QUdpSocket::readyRead, this, &UDPworker::readPendingDatagrams);
-    //метод readReady с readPendingTextDatagram
-    //readPendingTextDatagram будет вызывать метод ReadDatagram(datagram);
-    //ReadDatagram(datagram) содержить сериализацию строки в байты
-    connect (serviceUdpSocket, &QUdpSocket::readyRead, this, &UDPworker::readTextDatagram);
+}
+
+void UDPworker::InitSocketForText()
+{
+    _textSocket = new QUdpSocket(this);
+    _textSocket->bind(QHostAddress::LocalHost, TEXT_PORT);
+    connect (_textSocket, &QUdpSocket::readyRead, this, &UDPworker::processTextDatagram);
 }
 
 /*!
@@ -34,7 +36,6 @@ void UDPworker::InitSocket()
  */
 void UDPworker::ReadDatagram(QNetworkDatagram datagram)
 {
-
     QByteArray data;
     data = datagram.data(); //считываем данные датаграммы
 
@@ -47,33 +48,29 @@ void UDPworker::ReadDatagram(QNetworkDatagram datagram)
 
 void UDPworker::ReadTextDatagram(QNetworkDatagram datagram)
 {
+    auto address = datagram.senderAddress();
     QByteArray data;
     data = datagram.data(); //считываем данные датаграммы
+    _textSize = data.size();
 
     QDataStream inStr(&data, QIODevice::ReadOnly);
-    QString text= " ";
+    QString text;
     inStr >> text;
 
-    emit sig_sendTextToGUI(text);
+    emit sig_sendTextToGUI(text, address,_textSize);
 }
 /*!
  * @brief Метод осуществляет опередачу датаграммы
  */
-void UDPworker::SendDatagram(QByteArray data)
+void UDPworker::SendTextDatagram(QByteArray& baData)
 {
-    /*
-     *  Отправляем данные на localhost и задефайненный порт
-     */
-    serviceUdpSocket->writeDatagram(data, QHostAddress::LocalHost, BIND_PORT);
+    _textSize = _textSocket->writeDatagram(baData, QHostAddress::LocalHost, TEXT_PORT);
 }
 
-QString UDPworker::getServerAddress()
+void UDPworker::SendDatagram(QByteArray data)
 {
-    const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
-    for (const QHostAddress &address: QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
-           return address.toString();
-    };
+    // Отправляем данные на localhost и задефайненный порт
+    serviceUdpSocket->writeDatagram(data, QHostAddress::LocalHost, BIND_PORT);
 }
 
 /*!
@@ -81,20 +78,17 @@ QString UDPworker::getServerAddress()
  */
 void UDPworker::readPendingDatagrams( void )
 {
-    /*
-     *  Производим чтение принятых датаграмм
-     */
+    //Производим чтение принятых датаграмм
     while(serviceUdpSocket->hasPendingDatagrams()){
             QNetworkDatagram datagram = serviceUdpSocket->receiveDatagram();
             ReadDatagram(datagram);
     }
-
 }
 
-void UDPworker::readTextDatagram()
+void UDPworker::processTextDatagram()
 {
-    while(serviceUdpSocket->hasPendingDatagrams()){
-        QNetworkDatagram datagram = serviceUdpSocket->receiveDatagram();
+    while (_textSocket->hasPendingDatagrams()) {
+        QNetworkDatagram datagram = _textSocket->receiveDatagram();
         ReadTextDatagram(datagram);
     }
 }

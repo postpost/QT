@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     udpWorker = new UDPworker(this);
     udpWorker->InitSocket();
-
     connect(udpWorker, &UDPworker::sig_sendTimeToGUI, this, &MainWindow::DisplayTime);
 
     timer = new QTimer(this);
@@ -19,20 +18,14 @@ MainWindow::MainWindow(QWidget *parent)
 
         QByteArray dataToSend;
         QDataStream outStr(&dataToSend, QIODevice::WriteOnly);
-
         outStr << dateTime;
-
         udpWorker->SendDatagram(dataToSend);
-        //timer->start(TIMER_DELAY);
-
     });
 
-    connect(udpWorker, &UDPworker::sig_sendTextToGUI, this, [&]{
-        ui->te_result->append("Принято сообщение от: " +
-                              udpWorker->getServerAddress() +
-                                ", размер сообщения " + QString::number(textSize) +
-                                " байт");
-    });
+    //Socket to send a message
+    _udpSocket = new UDPworker(this);
+    _udpSocket->InitSocketForText();
+    connect(_udpSocket, &UDPworker::sig_sendTextToGUI, this, &MainWindow::DisplayMessage);
 }
 
 MainWindow::~MainWindow()
@@ -60,6 +53,11 @@ void MainWindow::DisplayTime(QDateTime data)
 
 }
 
+void MainWindow::DisplayMessage(QString text, QHostAddress address, uint32_t size)
+{
+    ui->te_result->append("Принято сообщение \"" + text + "\" " + " от: " + address.toString()+ QString::number(size));
+}
+
 
 void MainWindow::on_pb_stop_clicked()
 {
@@ -70,12 +68,10 @@ void MainWindow::on_pb_stop_clicked()
 void MainWindow::on_pb_sendDatagram_clicked()
 {
     QString textData = ui->le_inputText->text();
-    textSize = textData.size() * sizeof(char);
     QByteArray data;
 
     QDataStream outStream (&data, QIODevice::WriteOnly);
     outStream << textData;
-    udpWorker->ReadTextDatagram(data);
-
+    _udpSocket->SendTextDatagram(data);
 }
 
