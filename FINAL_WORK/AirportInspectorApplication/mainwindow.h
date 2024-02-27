@@ -49,6 +49,7 @@ private:
     QString _airportCode;
     QSqlQueryModel *_model;
    // QDate
+    QString _date;
 
     //SHOW GRAPHS IN NEW WINDOW
     FlightGraphs *_flightGraphs;

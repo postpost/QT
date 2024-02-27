@@ -106,6 +106,13 @@ void FlightGraphs::DisplayMonthlyData()
     ui->cPlot_Monthly->yAxis->setLabel("Flights count");
     ui->cPlot_Monthly->xAxis->setTicks(true);
 
+    //Добавляет лейблы шага сетки по оси Х
+    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+    for (int i=0; i < _monthList.size(); ++i){
+        textTicker->addTick(i+1, _monthList[i]);
+    }
+    ui->cPlot_Monthly->xAxis->setTicker(textTicker);
+
     //ADD STEP
     QVector<double> _xM;
     QVector<double> _yM;

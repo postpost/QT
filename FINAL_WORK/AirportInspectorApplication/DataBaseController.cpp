@@ -80,20 +80,7 @@ void DataBaseController::RequestToDb(QString query, int queryType)
         _modelDirection->setQuery(query, *_database);
         err = _modelList->lastError();
         break;
-    case queryType::graphMonthly:
-       // qDebug() << _database->open();
-        //TO TEST
-        qDebug() << status;
-        if (_modelGraph !=nullptr){
-            delete _modelGraph;
-        }
-        _modelGraph = new QSqlQueryModel( );
-        _modelGraph ->setQuery(query, *_database);
-        err = _modelList->lastError();
-        break;
-    case queryType::graphDaily:
-        // qDebug() << _database->open();
-        //TO TEST
+    case queryType::graphMonthly: case queryType::graphDaily:
         qDebug() << status;
         if (_modelGraph !=nullptr){
             delete _modelGraph;

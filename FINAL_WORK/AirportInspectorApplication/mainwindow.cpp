@@ -103,14 +103,14 @@ void MainWindow::SetUpQuery(QString airportCode, int queryType)
         _qrArrivals = QString("SELECT flight_no, scheduled_arrival, ad.airport_name->>'ru' "
                               "as \"Name\" from bookings.flights f "
                               "JOIN bookings.airports_data ad on ad.airport_code = f.departure_airport "
-                              "WHERE f.arrival_airport  = '%1'").arg(airportCode);
+                              "WHERE f.arrival_airport  = '%1' AND scheduled_arrival::date = ('%2') ").arg(airportCode).arg(_date);
     }
     else if (queryType == queryType::departures){
 
         _qrDepartures = QString("SELECT flight_no, scheduled_departure, ad.airport_name->>'ru' as \"Name\" "
                                 "FROM bookings.flights f "
                                 "JOIN bookings.airports_data ad on ad.airport_code = f.arrival_airport "
-                                "WHERE f.departure_airport  = '%1'").arg(airportCode);
+                                "WHERE f.departure_airport  = '%1'AND scheduled_departure::date = ('%2')").arg(airportCode).arg(_date);
     }
     else if (queryType == queryType::graphDaily){
         _qrGraphDaily = QString("SELECT count(flight_no), date_trunc('day', scheduled_departure) "
@@ -170,7 +170,8 @@ void MainWindow::PointsDataReceived(QMap<QString, QString> &dailyFlightData)
 
 void MainWindow::on_btn_Receive_clicked()
 {
-     _airportCode =_database->GetAirportCode(ui->cmb_AirportList->currentIndex());
+    _date =  ui->dateSelect->date().toString();
+    _airportCode =_database->GetAirportCode(ui->cmb_AirportList->currentIndex());
     if (ui->rdbArrivals->isChecked()){
         SetUpQuery(_airportCode, queryType::arrivals);
       // qDebug() <<  _airportCode;
