@@ -20,14 +20,13 @@ DataBaseController::DataBaseController(QObject *parent)
     _connectionData[dbName] = "demo";
     _connectionData[login] = "netology_usr_cpp";
     _connectionData[psw] = "CppNeto3";
-    _connectionData[port] = "5432";
+    _connectionData[port] = "5432"; //5432
 
 }
 
 DataBaseController::~DataBaseController()
 {
     delete _database;
-   // delete _query; //ATTENTION (TEST: будем сохранять модель в mainwindow)
 }
 
 void DataBaseController::AddDatabase(QString driver, QString dbName)
@@ -144,7 +143,7 @@ void DataBaseController::ReadDataFromDb(QString query, int queryType)
         QString count = "";
         QString day ="";
         int month = 0;
-        qDebug() << _modelGraph->rowCount();
+       // qDebug() << _modelGraph->rowCount();
         for (int i =0; i <_modelGraph->rowCount();++i){
             day = _modelGraph->record(i).value(1).toString();
             count = _modelGraph->record(i).value(0).toString();

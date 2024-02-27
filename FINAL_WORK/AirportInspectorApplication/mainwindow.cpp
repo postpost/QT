@@ -11,6 +11,8 @@ MainWindow::MainWindow(QWidget *parent)
     _msgBox = new QMessageBox(this);
     _timer = new QTimer (this);
 
+    //BLOCK BUTTONS
+    SetButtonsEnabled(false);
 
     //SETTINGS FOR UI
     ui->lbl_ConnectionStatus->setText("Отключено");
@@ -20,12 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
     //CONNECT TO DATABASE
     _database->AddDatabase(POSTGRE_DRIVER, DB_NAME);
 
-
     connect(_database, &DataBaseController::sig_SendConnectionStatus, this, &MainWindow::ConnectionStatusReceived);
     connect(_database,&DataBaseController::sig_SendQueryStatus, this, &MainWindow::QueryStatusReceived);
     //после прочтения СЖЕЧЬ
     connect (_database, &DataBaseController::sig_SendReadData, this, &MainWindow::DisplayResults);
-    //метод для переподключения к БД (TO DO!!!)
+    //метод для переподключения к БД
     connect(_timer, &QTimer::timeout, _database, &DataBaseController::ConnectToDb);
 
     //сигнал о получении данных для графиков
@@ -35,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     _database->ConnectToDb();
     bool status = _database->GetConnectionStatus();
 
-    ConnectionStatusReceived(status);
+    //ConnectionStatusReceived(status);
 }
 
 MainWindow::~MainWindow()
@@ -50,14 +51,15 @@ void MainWindow::ConnectionStatusReceived(bool status)
         ui->lbl_ConnectionStatus->setStyleSheet("color:green");
         LoadInitialDataList(); //загружает первоначальные данные
          _airportCode =_database->GetAirportCode(ui->cmb_AirportList->currentIndex());
-        //второй лист тут же, мб нужна будет многопоточка
+        //activate buttons
+         SetButtonsEnabled(true);
+
      }
 
     else {
+        SetButtonsEnabled(false);
         ui->lbl_ConnectionStatus->setText("Отключено");
         ui->lbl_ConnectionStatus->setStyleSheet("color:red");
-
-        //TO DO: повторить попытку подключения (timer)
         _database->DisconnectFromDb(DB_NAME);
         //show msg with the error
         _msgBox->setIcon(QMessageBox::Critical);
@@ -195,5 +197,11 @@ void MainWindow::on_act_Graphs_triggered()
 void MainWindow::on_btn_Clear_clicked()
 {
     _model->clear();
+}
+
+void MainWindow::SetButtonsEnabled(bool status)
+{
+    ui->btn_Clear->setEnabled(status);
+    ui->btn_Receive->setEnabled(status);
 }
 

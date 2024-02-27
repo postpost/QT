@@ -28,7 +28,7 @@ void GraphManager::AddPointsToGraph(QVector<double> &x, QVector<double> &y)
 
 void GraphManager::ClearGraph(QCustomPlot *plot)
 {
-    qDebug() << _graphType;
+   // qDebug() << _graphType;
     if (_graphType == graphType::bar){
             _barGraph->data()->clear();
     }

@@ -56,6 +56,7 @@ private:
 
 
     //methods
+    void SetButtonsEnabled(bool status);
     void LoadInitialDataList();
     void SendRequestToDb(QString query);
    // void DisplayDestinations(QString row);
